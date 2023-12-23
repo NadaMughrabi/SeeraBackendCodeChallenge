@@ -1,9 +1,12 @@
+//Nada Mughrabi
 package backendTestScenarios;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
 
 public class flightSearchResults {
 	
@@ -24,8 +27,33 @@ public class flightSearchResults {
 		
 		flightSearchMetadata = get(flightSearchMetadataURL)
 								.then()
-								.statusCode(200)
 								.extract();
+		
+		Assert.assertEquals(flightSearchMetadata.statusCode(), 200);
+		
+		String searchTypeResponce = flightSearchMetadata.jsonPath().get("request.searchType").toString();
+		Assert.assertEquals(searchTypeResponce, "Roundtrip");
+		
+		String isRoundTripResponce = flightSearchMetadata.jsonPath().get("request.isRoundTrip").toString();
+		Assert.assertEquals(isRoundTripResponce, "true");
+		
+		String preferredCabinResponse  = flightSearchMetadata.jsonPath().get("request.leg[0].preferredCabin").toString();
+		Assert.assertEquals(preferredCabinResponse, "Economy");
+		
+		String originIdResponse = flightSearchMetadata.jsonPath().get("request.leg[0].originId").toString();
+		Assert.assertEquals(originIdResponse, "RUH");	
+		
+		String destinationIdResponse = flightSearchMetadata.jsonPath().get("request.leg[0].destinationId").toString();
+		Assert.assertEquals(destinationIdResponse, "JED");
+
+		String departureResponse = flightSearchMetadata.jsonPath().get("request.leg[0].departure").toString();
+		Assert.assertEquals(departureResponse, "2023-12-25");
+
+		String paxResponse = flightSearchMetadata.jsonPath().get("request.pax.adult").toString();
+		Assert.assertEquals(paxResponse, "2");
+		
+		String queryResponse = flightSearchMetadata.jsonPath().get("request.query").toString();
+		Assert.assertEquals(queryResponse, "RUH-JED/2023-12-25/2023-12-30/Economy/2Adult");
 	}
 	
 	/*API Request to fetch Search Results*/
@@ -34,13 +62,19 @@ public class flightSearchResults {
 	{
 		String flightSearchResultURL = API_URL + FLIGHTS_SEARCH_RESULT_ENDPOINT;
 		
+		String nID = flightSearchMetadata.jsonPath().get("next.nid").toString();
+		
 		given()
 			.contentType("application/json")
 			.body(flightSearchMetadata.asString())
 		.when()
 			.post(flightSearchResultURL)
 		.then()
+			.header("Content-Type",equalTo("application/json"))
 			.statusCode(200)
+			.body("next.nid", equalTo(nID))
 			.log().all();
+		
+		
 	}
 }
