@@ -26,8 +26,8 @@ public class flightSearchResults {
 		String flightSearchMetadataURL = API_URL + FLIGHTS_SEARCH_METADATA_ENDPOINT + SAMPLE_FLIGHT_QUERY;
 		
 		flightSearchMetadata = get(flightSearchMetadataURL)
-								.then()
-								.extract();
+					.then()
+					.extract();
 		
 		Assert.assertEquals(flightSearchMetadata.statusCode(), 200);
 		
@@ -73,8 +73,6 @@ public class flightSearchResults {
 			.header("Content-Type",equalTo("application/json"))
 			.statusCode(200)
 			.body("next.nid", equalTo(nID))
-			.log().all();
-		
-		
+			.log().all();	
 	}
 }
